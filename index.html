@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VELOCE | Redefining Luxury Footwear. Handcrafted Italian leather, modern ergonomics.">
+    <title>VELOCE | Luxury Footwear</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <!-- Fonts: Syncopate for headers (Luxury/Modern), Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Cursor Follower (Optional luxury touch) -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <nav class="nav container">
+            <a href="#" class="nav__logo">VELOCE</a>
+
+            <div class="nav__menu" id="nav-menu">
+                <ul class="nav__list">
+                    <li class="nav__item"><a href="#home" class="nav__link active-link">Home</a></li>
+                    <li class="nav__item"><a href="#collection" class="nav__link">Collection</a></li>
+                    <li class="nav__item"><a href="atelier.html" class="nav__link">Atelier</a></li>
+                    <li class="nav__item"><a href="faqs.html" class="nav__link">FAQs</a></li>
+                    <li class="nav__item"><a href="contact.html" class="nav__link">Contact</a></li>
+                </ul>
+                <div class="nav__close" id="nav-close">
+                    <i class="ri-close-line"></i>
+                </div>
+            </div>
+
+            <div class="nav__actions">
+                <i class="ri-moon-line change-theme" id="theme-button"></i>
+                <div class="nav__cart" id="cart-btn">
+                    <i class="ri-shopping-bag-3-line"></i>
+                    <span class="cart__count" id="cart-count">0</span>
+                </div>
+                <div class="nav__toggle" id="nav-toggle">
+                    <i class="ri-menu-4-line"></i>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Cart Sidebar -->
+    <div class="cart" id="cart-sidebar">
+        <div class="cart__header">
+            <h2 class="cart__title">Your Selection</h2>
+            <i class="ri-close-line cart__close" id="cart-close"></i>
+        </div>
+        <div class="cart__content" id="cart-content">
+            <!-- Cart items will be injected here -->
+            <div class="cart__empty">
+                <p>Your bag is empty.</p>
+                <a href="#collection" class="button button--small">Start Shopping</a>
+            </div>
+        </div>
+        <div class="cart__footer" id="cart-footer">
+            <div class="cart__total">
+                <span>Subtotal</span>
+                <span id="cart-total-price">$0.00</span>
+            </div>
+            <button class="button cart__checkout-btn" id="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </div>
+    <div class="cart__overlay" id="cart-overlay"></div>
+
+    <!-- Checkout Modal -->
+    <div class="modal" id="checkout-modal">
+        <div class="modal__content">
+            <i class="ri-close-line modal__close" id="checkout-close"></i>
+            <h2 class="modal__title">Secure Checkout</h2>
+            
+            <form class="checkout__form" id="checkout-form">
+                <!-- Step 1: Details -->
+                <div class="checkout__section">
+                    <h3 class="checkout__subtitle">Shipping Details</h3>
+                    <div class="form__group">
+                        <input type="text" id="name" class="form__input" placeholder=" " required>
+                        <label for="name" class="form__label">Full Name</label>
+                    </div>
+                    <div class="form__row">
+                        <div class="form__group">
+                            <input type="email" id="email" class="form__input" placeholder=" " required>
+                            <label for="email" class="form__label">Email</label>
+                        </div>
+                        <div class="form__group">
+                            <input type="tel" id="phone" class="form__input" placeholder=" " required>
+                            <label for="phone" class="form__label">Phone</label>
+                        </div>
+                    </div>
+                    <div class="form__group">
+                        <input type="text" id="address" class="form__input" placeholder=" " required>
+                        <label for="address" class="form__label">Address</label>
+                    </div>
+                    <div class="form__row">
+                        <div class="form__group">
+                            <input type="text" id="city" class="form__input" placeholder=" " required>
+                            <label for="city" class="form__label">City</label>
+                        </div>
+                        <div class="form__group">
+                            <input type="text" id="zip" class="form__input" placeholder=" " required>
+                            <label for="zip" class="form__label">Zip Code</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Payment -->
+                <div class="checkout__section">
+                    <h3 class="checkout__subtitle">Payment Method</h3>
+                    <div class="payment__options">
+                        <div class="payment__option active" data-method="cod">
+                            <i class="ri-money-dollar-circle-line"></i>
+                            <span>Cash on Delivery</span>
+                        </div>
+                    </div>
+
+                    <!-- Card Details Removed -->
+                    
+                    <div class="payment__details" id="cod-details">
+                        <p class="payment__text">Pay securely with cash upon delivery.</p>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="checkout__summary">
+                    <div class="summary__row">
+                        <span>Total Amount</span>
+                        <span class="summary__total" id="checkout-total">$0.00</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="button checkout__submit">Complete Order</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Success Overlay -->
+    <div class="success-overlay" id="success-overlay">
+        <div class="success__content">
+            <div class="success__icon">
+                <i class="ri-check-line"></i>
+            </div>
+            <h2 class="success__title">Order Placed</h2>
+            <p class="success__message">Thank you for choosing VELOCE. Your order has been confirmed.</p>
+            <button class="button" id="success-close">Continue Shopping</button>
+        </div>
+    </div>
+
+    <main class="main">
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="hero__bg"></div>
+            <div class="hero__container container">
+                <div class="hero__content">
+                    <h2 class="hero__subtitle">Spring / Summer 2026</h2>
+                    <h1 class="hero__title">WALK <br> ON AIR</h1>
+                    <p class="hero__description">
+                        Merging Italian craftsmanship with futuristic ergonomics. 
+                        Designed for the visionaries.
+                    </p>
+                    <div class="hero__btns">
+                        <a href="#collection" class="button">Shop Collection</a>
+                        <a href="atelier.html" class="button button--ghost">Discover Story</a>
+                    </div>
+                </div>
+                <div class="hero__visual">
+                    <!-- Parallax Image Container -->
+                    <div class="hero__img-wrapper" data-speed="2">
+                        <img src="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=2012&auto=format&fit=crop" alt="Hero Shoe" class="hero__img">
+                    </div>
+                    <!-- Floating Elements for depth -->
+                    <!-- <div class="floating-card" data-speed="4">
+                        <span>Premium Leather</span>
+                    </div> -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories -->
+        <section class="section category" id="category">
+            <div class="container">
+                <div class="section__header">
+                    <h2 class="section__title">Curated Collections</h2>
+                    <a href="#collection" class="section__link">View All <i class="ri-arrow-right-line"></i></a>
+                </div>
+                
+                <div class="category__grid">
+                    <a href="slippers.html" class="category__item">
+                        <img src="https://images.unsplash.com/photo-1603487742131-4160ec999306?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Luxury Slippers" class="category__img">
+                        <div class="category__content">
+                            <h3>Slippers</h3>
+                            <span class="link-underline">Shop Now</span>
+                        </div>
+                    </a>
+                    <a href="formal-shoes.html" class="category__item">
+                        <img src="https://images.unsplash.com/photo-1533867617858-e7b97e060509?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Formal Shoes" class="category__img">
+                        <div class="category__content">
+                            <h3>Formal</h3>
+                            <span class="link-underline">Shop Now</span>
+                        </div>
+                    </a>
+                    <a href="sandals.html" class="category__item">
+                        <img src="https://images.unsplash.com/photo-1625318880248-a7cc6bcf0c0f?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Sandals" class="category__img">
+                        <div class="category__content">
+                            <h3>Sandals</h3>
+                            <span class="link-underline">Shop Now</span>
+                        </div>
+                    </a>
+                    <a href="sneakers.html" class="category__item">
+                        <img src="https://images.unsplash.com/photo-1620794341491-76be6eeb6946?q=80&w=694&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Sneakers" class="category__img">
+                        <div class="category__content">
+                            <h3>Sneakers</h3>
+                            <span class="link-underline">Shop Now</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Collection (Shop) -->
+        <section class="section collection" id="collection">
+            <div class="container">
+                <h2 class="section__title center-text">The Signature Series</h2>
+                <p class="section__subtitle center-text">Timeless design meets modern engineering.</p>
+                
+                <div class="collection__header">
+                    <div class="collection__filters">
+                        <div class="filter__group">
+                            <span class="filter__title">Sort By</span>
+                            <div class="filter__options">
+                                <button class="filter-btn active" data-sort="all">All</button>
+                                <button class="filter-btn" data-sort="newest">Newest</button>
+                                <button class="filter-btn" data-sort="price-low">Price: Low-High</button>
+                                <button class="filter-btn" data-sort="price-high">Price: High-Low</button>
+                            </div>
+                        </div>
+                        
+                        <div class="filter__group">
+                            <span class="filter__title">Category</span>
+                            <div class="filter__options">
+                                <button class="filter-btn" data-category="all">All</button>
+                                <button class="filter-btn" data-category="Sneakers">Sneakers</button>
+                                <button class="filter-btn" data-category="Slippers">Slippers</button>
+                                <button class="filter-btn" data-category="Sandals">Sandals</button>
+                                <button class="filter-btn" data-category="Formal">Formal</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collection__grid" id="product-grid">
+                    <!-- Products injected via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Marquee / Brand Ticker -->
+        <div class="marquee">
+            <div class="marquee__content">
+                <span>VELOCE</span> <span>LUXURY</span> <span>COMFORT</span> <span>DESIGN</span> <span>FUTURE</span> <span>VELOCE</span> <span>LUXURY</span> <span>COMFORT</span> <span>DESIGN</span> <span>FUTURE</span>
+            </div>
+        </div>
+
+        <!-- Story / Atelier -->
+        <section class="section story" id="about">
+            <div class="container story__container">
+                <div class="story__img-box">
+                    <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1200&auto=format&fit=crop" alt="The Atelier" class="story__img">
+                </div>
+                <div class="story__data">
+                    <span class="story__subtitle">The Atelier</span>
+                    <h2 class="story__title">HANDCRAFTED <br> PERFECTION</h2>
+                    <p class="story__description">
+                        Every pair of VELOCE shoes is a testament to the art of shoemaking. 
+                        Sourced from the finest tanneries in Tuscany and handcrafted by master artisans who have dedicated their lives to the craft. 
+                        We don't just make shoes; we engineer confidence.
+                    </p>
+                    
+                    <div class="story__stats">
+                        <div class="story__stat">
+                            <span class="story__stat-number">100+</span>
+                            <span class="story__stat-title">Artisans</span>
+                        </div>
+                        <div class="story__stat">
+                            <span class="story__stat-number">48h</span>
+                            <span class="story__stat-title">Process</span>
+                        </div>
+                        <div class="story__stat">
+                            <span class="story__stat-number">10y</span>
+                            <span class="story__stat-title">Guarantee</span>
+                        </div>
+                    </div>
+                    
+                    <a href="atelier.html" class="button button--ghost">Explore Process</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsletter -->
+        <section class="section newsletter" id="contact">
+            <div class="newsletter__bg"></div>
+            <div class="container newsletter__container">
+                <h2 class="newsletter__title">Join the Inner Circle</h2>
+                <p>Get early access to limited drops and exclusive events.</p>
+                <form class="newsletter__form">
+                    <input type="email" placeholder="Email Address" required>
+                    <button type="submit" class="button">Subscribe</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__top grid">
+                <div class="footer__col">
+                    <a href="#" class="footer__logo">VELOCE</a>
+                    <p>Redefining luxury footwear for the modern era.</p>
+                </div>
+                <div class="footer__col">
+                    <h4>Shop</h4>
+                    <ul class="footer__links">
+                        <li><a href="new-arrivals.html" class="footer__link">New Arrivals</a></li>
+                        <li><a href="best-sellers.html" class="footer__link">Best Sellers</a></li>
+                        <li><a href="accessories.html" class="footer__link">Accessories</a></li>
+                    </ul>
+                </div>
+                <div class="footer__col">
+                    <h4>Support</h4>
+                    <ul class="footer__links">
+                        <li><a href="shipping.html" class="footer__link">Shipping</a></li>
+                        <li><a href="returns.html" class="footer__link">Returns</a></li>
+                        <li><a href="faqs.html" class="footer__link">FAQs</a></li>
+                        <li><a href="contact.html" class="footer__link">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer__col">
+                    <h4>Social</h4>
+                    <div class="footer__socials">
+                        <a href="#"><i class="ri-instagram-line"></i></a>
+                        <a href="#"><i class="ri-twitter-x-line"></i></a>
+                        <a href="#"><i class="ri-facebook-fill"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p>&copy; 2026 VELOCE. All rights reserved.</p>
+                <a href="admin/login/index.html" class="footer__admin-link"><i class="ri-lock-line"></i> Admin</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>

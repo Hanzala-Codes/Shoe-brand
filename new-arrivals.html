@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Arrivals - VELOCE</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body data-page="new-arrivals">
+    <header class="header" id="header">
+        <nav class="nav container">
+            <a href="index.html" class="nav__logo">VELOCE</a>
+            <div class="nav__menu" id="nav-menu">
+                <ul class="nav__list">
+                    <li class="nav__item"><a href="index.html" class="nav__link">Home</a></li>
+                    <li class="nav__item"><a href="index.html#collection" class="nav__link active-link">Collection</a></li>
+                    <li class="nav__item"><a href="atelier.html" class="nav__link active-link">Atelier</a></li>
+                    <li class="nav__item"><a href="faqs.html" class="nav__link">FAQs</a></li>
+                    <li class="nav__item"><a href="contact.html" class="nav__link">Contact</a></li>
+                </ul>
+                <div class="nav__close" id="nav-close"><i class="ri-close-line"></i></div>
+            </div>
+            <div class="nav__actions">
+                <i class="ri-moon-line change-theme" id="theme-button"></i>
+                <div class="nav__cart" id="cart-btn">
+                    <i class="ri-shopping-bag-3-line"></i>
+                    <span class="cart__count" id="cart-count">0</span>
+                </div>
+                <div class="nav__toggle" id="nav-toggle"><i class="ri-menu-4-line"></i></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main">
+        <section class="section">
+            <div class="container">
+                <h2 class="section__title center-text">New Arrivals</h2>
+                <p class="section__subtitle center-text">Fresh silhouettes and seasonal palettes</p>
+                <div class="collection__header">
+                    <div class="collection__filters">
+                        <div class="filter__group">
+                            <span class="filter__title">Sort By</span>
+                            <div class="filter__options">
+                                <button class="filter-btn active" data-sort="all">All</button>
+                                <button class="filter-btn" data-sort="newest">Newest</button>
+                                <button class="filter-btn" data-sort="price-low">Price: Low-High</button>
+                                <button class="filter-btn" data-sort="price-high">Price: High-Low</button>
+                            </div>
+                        </div>
+                        
+                        <div class="filter__group">
+                            <span class="filter__title">Price Range</span>
+                            <div class="filter__options">
+                                <button class="filter-btn active" data-price="all">All</button>
+                                <button class="filter-btn" data-price="0-100">Under $100</button>
+                                <button class="filter-btn" data-price="100-200">$100 - $200</button>
+                                <button class="filter-btn" data-price="200-above">$200+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="collection__grid" id="product-grid"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__top grid">
+                <div class="footer__col">
+                    <a href="index.html" class="footer__logo">VELOCE</a>
+                    <p>Redefining luxury footwear for the modern era.</p>
+                </div>
+                <div class="footer__col">
+                    <h4>Shop</h4>
+                    <ul class="footer__links">
+                        <li><a href="new-arrivals.html" class="footer__link">New Arrivals</a></li>
+                        <li><a href="best-sellers.html" class="footer__link">Best Sellers</a></li>
+                        <li><a href="accessories.html" class="footer__link">Accessories</a></li>
+                    </ul>
+                </div>
+                <div class="footer__col">
+                    <h4>Support</h4>
+                    <ul class="footer__links">
+                        <li><a href="shipping.html" class="footer__link">Shipping</a></li>
+                        <li><a href="returns.html" class="footer__link">Returns</a></li>
+                        <li><a href="contact.html" class="footer__link">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer__col">
+                    <h4>Social</h4>
+                    <div class="footer__socials">
+                        <a href="#"><i class="ri-instagram-line"></i></a>
+                        <a href="#"><i class="ri-twitter-x-line"></i></a>
+                        <a href="#"><i class="ri-facebook-fill"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p>&copy; 2026 VELOCE. All rights reserved.</p>
+                <a href="admin/login/index.html" class="footer__admin-link"><i class="ri-lock-line"></i> Admin</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+*** End Patch
+} ***!

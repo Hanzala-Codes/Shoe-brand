@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VELOCE | Luxury Formal Shoes. Timeless elegance.">
+    <title>VELOCE | Formal Collection</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body data-page="formal">
+    <!-- Cursor Follower -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <nav class="nav container">
+            <a href="index.html" class="nav__logo">VELOCE</a>
+
+            <div class="nav__menu" id="nav-menu">
+                <ul class="nav__list">
+                    <li class="nav__item"><a href="index.html" class="nav__link">Home</a></li>
+                    <li class="nav__item"><a href="index.html#collection" class="nav__link active-link">Collection</a></li>
+                    <li class="nav__item"><a href="atelier.html" class="nav__link">Atelier</a></li>
+                    <li class="nav__item"><a href="faqs.html" class="nav__link">FAQs</a></li>
+                    <li class="nav__item"><a href="contact.html" class="nav__link">Contact</a></li>
+                </ul>
+                <div class="nav__close" id="nav-close">
+                    <i class="ri-close-line"></i>
+                </div>
+            </div>
+
+            <div class="nav__actions">
+                <i class="ri-moon-line change-theme" id="theme-button"></i>
+                <div class="nav__cart" id="cart-btn">
+                    <i class="ri-shopping-bag-3-line"></i>
+                    <span class="cart__count" id="cart-count">0</span>
+                </div>
+                <div class="nav__toggle" id="nav-toggle">
+                    <i class="ri-menu-4-line"></i>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Cart Sidebar -->
+    <div class="cart" id="cart-sidebar">
+        <div class="cart__header">
+            <h2 class="cart__title">Your Selection</h2>
+            <i class="ri-close-line cart__close" id="cart-close"></i>
+        </div>
+        <div class="cart__content" id="cart-content">
+            <div class="cart__empty">
+                <p>Your bag is empty.</p>
+                <button class="button button--small" onclick="closeCart()">Start Shopping</button>
+            </div>
+        </div>
+        <div class="cart__footer" id="cart-footer">
+            <div class="cart__total">
+                <span>Subtotal</span>
+                <span id="cart-total-price">$0.00</span>
+            </div>
+            <button class="button cart__checkout-btn" id="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </div>
+    <div class="cart__overlay" id="cart-overlay"></div>
+
+    <!-- Checkout Modal -->
+    <div class="modal" id="checkout-modal">
+        <div class="modal__content">
+            <i class="ri-close-line modal__close" id="checkout-close"></i>
+            <h2 class="modal__title">Secure Checkout</h2>
+            <form class="checkout__form" id="checkout-form">
+                <div class="checkout__section">
+                    <h3 class="checkout__subtitle">Shipping Details</h3>
+                    <div class="form__group">
+                        <input type="text" id="name" class="form__input" placeholder=" " required>
+                        <label for="name" class="form__label">Full Name</label>
+                    </div>
+                    <div class="form__row">
+                        <div class="form__group">
+                            <input type="email" id="email" class="form__input" placeholder=" " required>
+                            <label for="email" class="form__label">Email</label>
+                        </div>
+                        <div class="form__group">
+                            <input type="tel" id="phone" class="form__input" placeholder=" " required>
+                            <label for="phone" class="form__label">Phone</label>
+                        </div>
+                    </div>
+                    <div class="form__group">
+                        <input type="text" id="address" class="form__input" placeholder=" " required>
+                        <label for="address" class="form__label">Address</label>
+                    </div>
+                    <div class="form__row">
+                        <div class="form__group">
+                            <input type="text" id="city" class="form__input" placeholder=" " required>
+                            <label for="city" class="form__label">City</label>
+                        </div>
+                        <div class="form__group">
+                            <input type="text" id="zip" class="form__input" placeholder=" " required>
+                            <label for="zip" class="form__label">Zip Code</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="checkout__section">
+                    <h3 class="checkout__subtitle">Payment Method</h3>
+                    <div class="payment__options">
+                        <div class="payment__option active" data-method="cod">
+                            <i class="ri-money-dollar-circle-line"></i>
+                            <span>Cash on Delivery</span>
+                        </div>
+                    </div>
+
+                    <!-- Card Details Removed -->
+                    
+                    <div class="payment__details" id="cod-details">
+                        <p class="payment__text">Pay securely with cash upon delivery.</p>
+                    </div>
+                </div>
+                <div class="checkout__summary">
+                    <div class="summary__row">
+                        <span>Total Amount</span>
+                        <span class="summary__total" id="checkout-total">$0.00</span>
+                    </div>
+                </div>
+                <button type="submit" class="button checkout__submit">Complete Order</button>
+            </form>
+        </div>
+    </div>
+    <div class="success-overlay" id="success-overlay">
+        <div class="success__content">
+            <div class="success__icon"><i class="ri-check-line"></i></div>
+            <h2 class="success__title">Order Placed</h2>
+            <p class="success__message">Thank you for choosing VELOCE. Your order has been confirmed.</p>
+            <button class="button" id="success-close">Continue Shopping</button>
+        </div>
+    </div>
+
+    <main class="main">
+        <!-- Category Hero -->
+        <section class="hero hero--category">
+            <div class="hero__bg"></div>
+            <div class="hero__container container">
+                <div class="hero__content">
+                    <h2 class="hero__subtitle">Collection</h2>
+                    <h1 class="hero__title">FORMAL</h1>
+                    <p class="hero__description">
+                        Timeless elegance for the definitive moments.
+                    </p>
+                </div>
+                <div class="hero__visual">
+                    <div class="hero__img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?q=80&w=2000&auto=format&fit=crop" alt="Formal Collection" class="hero__img">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Grid -->
+        <section class="section collection">
+            <div class="container">
+                <div class="collection__header">
+                    <div class="collection__filters">
+                        <div class="filter__group">
+                            <span class="filter__title">Sort By</span>
+                            <div class="filter__options">
+                                <button class="filter-btn active" data-sort="all">All</button>
+                                <button class="filter-btn" data-sort="newest">Newest</button>
+                                <button class="filter-btn" data-sort="price-low">Price: Low-High</button>
+                                <button class="filter-btn" data-sort="price-high">Price: High-Low</button>
+                            </div>
+                        </div>
+                        
+                        <div class="filter__group">
+                            <span class="filter__title">Price Range</span>
+                            <div class="filter__options">
+                                <button class="filter-btn active" data-price="all">All</button>
+                                <button class="filter-btn" data-price="0-100">Under $100</button>
+                                <button class="filter-btn" data-price="100-200">$100 - $200</button>
+                                <button class="filter-btn" data-price="200-above">$200+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collection__grid" id="product-grid">
+                    <!-- Products injected via JS -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__top grid">
+                <div class="footer__col">
+                    <a href="index.html" class="footer__logo">VELOCE</a>
+                    <p>Redefining luxury footwear for the modern era.</p>
+                </div>
+                <div class="footer__col">
+                    <h4>Shop</h4>
+                    <ul class="footer__links">
+                        <li><a href="sandals.html">Sandals</a></li>
+                        <li><a href="slippers.html">Slippers</a></li>
+                        <li><a href="sneakers.html">Sneakers</a></li>
+                        <li><a href="formal-shoes.html">Formal</a></li>
+                    </ul>
+                </div>
+                <div class="footer__col">
+                    <h4>Support</h4>
+                    <ul class="footer__links">
+                        <li><a href="shipping.html" class="footer__link">Shipping</a></li>
+                        <li><a href="returns.html" class="footer__link">Returns</a></li>
+                        <li><a href="contact.html" class="footer__link">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer__col">
+                    <h4>Social</h4>
+                    <div class="footer__socials">
+                        <a href="#"><i class="ri-instagram-line"></i></a>
+                        <a href="#"><i class="ri-twitter-x-line"></i></a>
+                        <a href="#"><i class="ri-facebook-fill"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p>&copy; 2026 VELOCE. All rights reserved.</p>
+                <a href="admin/login/index.html" class="footer__admin-link"><i class="ri-lock-line"></i> Admin</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>

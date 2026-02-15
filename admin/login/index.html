@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - VELOCE</title>
+  <link rel="stylesheet" href="/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <style>
+    .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 4rem 2rem; }
+    .login-card { width: 100%; max-width: 420px; background: var(--container-color); border: var(--glass-border); box-shadow: var(--glass-shadow); border-radius: 16px; padding: 2.5rem; }
+    .login-title { text-align: center; margin-bottom: 1.5rem; }
+    .login-subtitle { text-align: center; color: var(--text-color-light); margin-bottom: 2rem; }
+    .form__group { position: relative; margin-bottom: 1.25rem; }
+    .form__group input { width: 100%; padding: 1rem; background: transparent; border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); }
+    .button { width: 100%; }
+    .login__brand { text-align: center; margin-bottom: 1rem; font-family: var(--title-font); font-weight: 800; letter-spacing: -1px; }
+  </style>
+</head>
+<body>
+  <main class="login-wrap">
+    <div class="login-card">
+      <div class="login__brand">VELOCE Admin</div>
+      <h2 class="login-title">Sign In</h2>
+      <p class="login-subtitle">Enter your admin credentials</p>
+      <form id="admin-login-form">
+        <div class="form__group">
+          <input type="email" id="admin-email" placeholder="Admin Email" required>
+        </div>
+        <div class="form__group">
+          <input type="password" id="admin-password" placeholder="Password" required>
+        </div>
+        <button class="button" type="submit">Login</button>
+      </form>
+      <p class="center-text" id="login-message" style="margin-top:1rem;"></p>
+    </div>
+  </main>
+  <script>
+    const API_URL = 'http://localhost:3000/api';
+    const form = document.getElementById('admin-login-form');
+    const message = document.getElementById('login-message');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      message.textContent = '';
+      try {
+        const payload = {
+          email: document.getElementById('admin-email').value,
+          password: document.getElementById('admin-password').value
+        };
+        const resp = await fetch(`${API_URL}/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+        if (!resp.ok) {
+          const data = await resp.json().catch(() => ({}));
+          message.style.color = 'red';
+          message.textContent = data.error || 'Login failed';
+          return;
+        }
+        window.location.href = '/admin.html';
+      } catch (err) {
+        message.style.color = 'red';
+        message.textContent = 'Network error. Please try again.';
+      }
+    });
+  </script>
+</body>
+</html>

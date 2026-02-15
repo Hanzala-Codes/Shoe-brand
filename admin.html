@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - VELORÉ</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar__logo">
+                <h2>VELORÉ <span>Admin</span></h2>
+            </div>
+            <nav class="sidebar__nav">
+                <a href="#" class="sidebar__link active" data-tab="products">
+                    <i class="ri-store-2-line"></i> Products
+                </a>
+                <a href="#" class="sidebar__link" data-tab="orders">
+                    <i class="ri-shopping-bag-3-line"></i> Orders
+                </a>
+                <a href="index.html" class="sidebar__link logout">
+                    <i class="ri-logout-box-line"></i> Back to Site
+                </a>
+                <a href="#" class="sidebar__link" id="admin-logout">
+                    <i class="ri-shut-down-line"></i> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Products Tab -->
+            <section id="products-tab" class="tab-content active">
+                <header class="content-header">
+                    <h1>Product Management</h1>
+                    <button class="btn btn--primary" id="add-product-btn">
+                        <i class="ri-add-line"></i> Add New Product
+                    </button>
+                </header>
+                
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table-body">
+                            <!-- Products will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Orders Tab -->
+            <section id="orders-tab" class="tab-content">
+                <header class="content-header">
+                    <h1>Order Management</h1>
+                </header>
+                
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Details</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body">
+                            <!-- Orders will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div class="modal" id="product-modal">
+        <div class="modal__content">
+            <div class="modal__header">
+                <h2 id="modal-title">Add New Product</h2>
+                <i class="ri-close-line modal__close"></i>
+            </div>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+                
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="p-name" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="p-category" required>
+                            <option value="Sandals">Sandals</option>
+                            <option value="Slippers">Slippers</option>
+                            <option value="Sneakers">Sneakers</option>
+                            <option value="Formal">Formal</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($)</label>
+                        <input type="number" id="p-price" step="0.01" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Stock Quantity</label>
+                    <input type="number" id="p-stock" value="100">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="p-description" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="p-image-file" accept="image/*">
+                        <span>OR</span>
+                        <input type="text" id="p-image-url" placeholder="Paste Image URL">
+                    </div>
+                    <small>Upload file is preferred. If both provided, file takes precedence.</small>
+                </div>
+
+                <button type="submit" class="btn btn--primary btn--full">Save Product</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+    <script>
+      // Auth gate: redirect to login if not authenticated
+      (async function() {
+        try {
+          const resp = await fetch('http://localhost:3000/api/admin/me', { credentials: 'include' });
+          if (!resp.ok) {
+            window.location.href = '/admin/login';
+          }
+        } catch {
+          window.location.href = '/admin/login';
+        }
+      })();
+      // Logout
+      const logoutBtn = document.getElementById('admin-logout');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          await fetch('http://localhost:3000/api/admin/logout', { method: 'POST', credentials: 'include' });
+          window.location.href = '/admin/login';
+        });
+      }
+    </script>
+</body>
+</html>
