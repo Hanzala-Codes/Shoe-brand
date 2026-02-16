@@ -291,7 +291,10 @@ app.get('/api/products', (req, res) => {
 app.post('/api/products', adminAuth, upload.single('image'), (req, res) => {
     const { name, category, price, description, stock } = req.body;
     // If an image is uploaded, use the local path; otherwise use a placeholder or provided URL
-    const imagePath = req.file ? `http://localhost:${PORT}/uploads/${req.file.filename}` : req.body.imageUrl;
+    // const imagePath = req.file ? `http://localhost:${PORT}/uploads/${req.file.filename}` : req.body.imageUrl;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+const imagePath = req.file ? `${baseUrl}/uploads/${req.file.filename}` : req.body.imageUrl;
+
     const hoverImage = req.body.hoverImage || imagePath; // Simplify for now
 
     const sql = "INSERT INTO products (name, category, price, image, hoverImage, description, stock) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -462,6 +465,7 @@ app.get('/api/orders', adminAuth, (req, res) => {
 app.use('/', express.static(FRONTEND_DIR));
 
 // Start Server
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
 });
+
