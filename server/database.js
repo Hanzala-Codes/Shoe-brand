@@ -22,6 +22,7 @@ db.serialize(() => {
         hoverImage TEXT,
         description TEXT,
         stock INTEGER DEFAULT 100,
+        best_seller INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
@@ -35,6 +36,7 @@ db.serialize(() => {
         total_amount REAL NOT NULL,
         items TEXT NOT NULL, -- JSON string of items
         status TEXT DEFAULT 'Pending',
+        best_seller INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
     
