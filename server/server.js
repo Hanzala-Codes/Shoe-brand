@@ -144,7 +144,8 @@ function adminAuth(req, res, next) {
 // --- API ROUTES ---
 
 // --- STATIC (Protected Admin) ---
-const FRONTEND_DIR = path.join(__dirname, '..');
+// const FRONTEND_DIR = path.join(__dirname, '..');
+const FRONTEND_DIR = path.join(__dirname)
 
 app.get('/admin/login', (req, res) => {
   res.sendFile(path.join(FRONTEND_DIR, 'admin', 'login', 'index.html'));
@@ -461,11 +462,41 @@ app.get('/api/orders', adminAuth, (req, res) => {
     });
 });
 
-// Static assets fallback
-app.use('/', express.static(FRONTEND_DIR));
+// // Static assets fallback
+// app.use('/', express.static(FRONTEND_DIR));
+
+// // Start Server
+// app.listen(PORT, '0.0.0.0', () => {
+//     console.log(`Server running on port ${PORT}`);
+// });
+
+// Serve uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Serve admin (protected) static files
+app.use('/admin', (req, res, next) => {
+  if (req.path.startsWith('/login')) return next();
+  const cookies = parseCookies(req);
+  const token = cookies['admin_token'];
+  const payload = token ? verifyToken(token) : null;
+  if (!payload || payload.email !== ADMIN_EMAIL) {
+    res.redirect('/admin/login');
+    return;
+  }
+  next();
+}, express.static(path.join(FRONTEND_DIR, 'admin')));
+
+// Serve root static files (your index.html)
+app.use(express.static(FRONTEND_DIR));
+
+// SPA fallback for frontend routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
+});
 
 // Start Server
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
+
 
