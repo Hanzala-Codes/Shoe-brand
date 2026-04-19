@@ -102,6 +102,10 @@ body {
   line-height: 1.6;
 }
 
+body.no-scroll {
+  overflow: hidden; /* Stop page from scrolling behind cart */
+}
+
 h1, h2, h3, h4 {
   color: var(--title-color);
   font-family: var(--title-font);
@@ -1297,6 +1301,15 @@ body.dark-theme .marquee-item span {
     right: -100%;
     top: var(--header-height);
     height: calc(100% - var(--header-height));
+    visibility: hidden; /* Ensure it's hidden by default on mobile */
+    opacity: 0;
+    transition: 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+  }
+
+  .cart.open {
+    right: 0;
+    visibility: visible;
+    opacity: 1;
   }
 
   .cart__overlay {
@@ -1600,6 +1613,14 @@ body.dark-theme .marquee-item span {
   transition: 0.5s cubic-bezier(0.77, 0, 0.175, 1);
   display: flex;
   flex-direction: column;
+  visibility: hidden; /* Completely hidden by default */
+  pointer-events: none; /* Disable interaction when hidden */
+}
+
+.cart.open {
+  right: 0;
+  visibility: visible; /* Show when open */
+  pointer-events: auto; /* Enable interaction when open */
 }
 
 /* =============== ATELIER REDESIGN STYLES =============== */
@@ -1941,10 +1962,6 @@ body.dark-theme .marquee-item span {
     }
 }
 
-.cart.open {
-  right: 0;
-}
-
 .cart__overlay {
   position: fixed;
   top: 0;
@@ -1955,7 +1972,7 @@ body.dark-theme .marquee-item span {
   z-index: var(--z-fixed);
   opacity: 0;
   visibility: hidden;
-  transition: 0.3s;
+  transition: 0.5s cubic-bezier(0.77, 0, 0.175, 1); /* Consistent with cart sidebar */
   backdrop-filter: blur(4px);
 }
 

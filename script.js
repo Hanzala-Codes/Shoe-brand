@@ -344,6 +344,7 @@ function toggleCart() {
     if (!cartSidebar || !cartOverlay) return;
     cartSidebar.classList.toggle('open');
     cartOverlay.classList.toggle('open');
+    document.body.classList.toggle('no-scroll'); // Prevent background scrolling
 }
 
 if(cartBtn) cartBtn.addEventListener('click', toggleCart);
