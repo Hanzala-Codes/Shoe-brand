@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 </head>
-<body>
+<body class="support-page faq-page">
     <header class="header" id="header">
         <nav class="nav container">
             <a href="index.html" class="nav__logo">VELOCE</a>
@@ -33,29 +33,117 @@
     </header>
 
     <main class="main">
-        <section class="section">
-            <div class="container container-narrow">
-                <div class="section__header">
-                    <span class="section__subtitle">FAQs</span>
-                    <h2 class="section__title">Common Questions</h2>
-                </div>
-                <div class="grid">
-                    <div>
-                        <h3>Is bespoke available?</h3>
-                        <p class="footer__description">Yes. Reach our concierge to begin a bespoke inquiry.</p>
-                        <h3 style="margin-top:1rem;">Care & Maintenance?</h3>
-                        <p class="footer__description">Use neutral cream, store with shoe trees, and avoid excess moisture.</p>
+        <section class="support-hero support-hero--compact">
+            <div class="container">
+                <div class="support-hero__grid">
+                    <div class="support-hero__content">
+                        <span class="support-eyebrow">FAQs</span>
+                        <h1 class="support-hero__title">Guidance for fit, care, shipping, and service.</h1>
+                        <p class="support-hero__text">
+                            Answers to the most common questions, presented clearly and simply. If you need more tailored assistance, our concierge is always available.
+                        </p>
                     </div>
-                    <div>
-                        <h3>Break-in period?</h3>
-                        <p class="footer__description">Most pairs feel natural within 2–3 wears thanks to ergonomic lasts.</p>
-                        <h3 style="margin-top:1rem;">Warranty?</h3>
-                        <p class="footer__description">We stand behind craftsmanship with a 10-year workmanship confidence.</p>
+                    <div class="support-hero__media support-hero__media--soft">
+                        <div class="faq-hero-art" aria-hidden="true">
+                            <div class="faq-hero-art__panel"></div>
+                        </div>
                     </div>
                 </div>
-                <div style="margin-top:2rem; text-align:center;">
-                    <a href="contact.html" class="button">Speak To Concierge</a>
-                    <a href="index.html#collection" class="button button--ghost" style="margin-left:1rem;">Explore Collection</a>
+            </div>
+        </section>
+
+        <section class="support-section">
+            <div class="container">
+                <div class="support-card-grid support-card-grid--two">
+                    <article class="support-card">
+                        <i class="ri-scissors-cut-line support-card__icon"></i>
+                        <h2 class="support-card__title">Bespoke & Concierge</h2>
+                        <p class="support-card__text">Private guidance is available for bespoke inquiries, gifting questions, and fit recommendations.</p>
+                    </article>
+                    <article class="support-card">
+                        <i class="ri-shield-star-line support-card__icon"></i>
+                        <h2 class="support-card__title">Care & Longevity</h2>
+                        <p class="support-card__text">Thoughtful maintenance preserves shape, finish, and comfort, helping each pair wear beautifully over time.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="support-section support-section--alt">
+            <div class="container support-container--narrow">
+                <div class="support-section__header">
+                    <span class="support-eyebrow">Common Questions</span>
+                    <h2 class="support-section__title">Everything you may want to know.</h2>
+                </div>
+
+                <div class="faq-accordion">
+                    <article class="faq-accordion__item active">
+                        <button class="faq-accordion__trigger" type="button" aria-expanded="true">
+                            <span>Is bespoke available?</span>
+                            <i class="ri-add-line faq-accordion__icon"></i>
+                        </button>
+                        <div class="faq-accordion__panel">
+                            <p>Yes. Reach out through our concierge and we will guide you through availability, lead times, and personalization options.</p>
+                        </div>
+                    </article>
+
+                    <article class="faq-accordion__item">
+                        <button class="faq-accordion__trigger" type="button" aria-expanded="false">
+                            <span>How should I care for my shoes?</span>
+                            <i class="ri-add-line faq-accordion__icon"></i>
+                        </button>
+                        <div class="faq-accordion__panel">
+                            <p>Use a neutral cream, clean with a soft cloth or brush, allow pairs to rest between wears, and store them with shoe trees whenever possible.</p>
+                        </div>
+                    </article>
+
+                    <article class="faq-accordion__item">
+                        <button class="faq-accordion__trigger" type="button" aria-expanded="false">
+                            <span>Is there a break-in period?</span>
+                            <i class="ri-add-line faq-accordion__icon"></i>
+                        </button>
+                        <div class="faq-accordion__panel">
+                            <p>Most pairs feel increasingly natural within two to three wears as the leather begins to adapt and the fit settles comfortably.</p>
+                        </div>
+                    </article>
+
+                    <article class="faq-accordion__item">
+                        <button class="faq-accordion__trigger" type="button" aria-expanded="false">
+                            <span>Do you provide tracking after shipping?</span>
+                            <i class="ri-add-line faq-accordion__icon"></i>
+                        </button>
+                        <div class="faq-accordion__panel">
+                            <p>Yes. Once your order is dispatched, tracking information is sent by email so you can monitor delivery progress in real time.</p>
+                        </div>
+                    </article>
+
+                    <article class="faq-accordion__item">
+                        <button class="faq-accordion__trigger" type="button" aria-expanded="false">
+                            <span>What is your return window?</span>
+                            <i class="ri-add-line faq-accordion__icon"></i>
+                        </button>
+                        <div class="faq-accordion__panel">
+                            <p>Unworn items may be returned within 30 days of delivery, provided they are sent back in original condition and packaging.</p>
+                        </div>
+                    </article>
+
+                    <article class="faq-accordion__item">
+                        <button class="faq-accordion__trigger" type="button" aria-expanded="false">
+                            <span>Do your products include a workmanship guarantee?</span>
+                            <i class="ri-add-line faq-accordion__icon"></i>
+                        </button>
+                        <div class="faq-accordion__panel">
+                            <p>We stand behind the craftsmanship of every pair and are happy to review any workmanship concerns directly through customer care.</p>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="support-note-card support-note-card--cta">
+                    <p>Need a more specific answer? Our team can help with fit guidance, gifting questions, and order support.</p>
+                    <div class="support-note-card__actions">
+                        <a href="contact.html" class="button">Speak To Concierge</a>
+                        <a href="index.html#collection" class="button button--ghost">Explore Collection</a>
+                    </div>
                 </div>
             </div>
         </section>

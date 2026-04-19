@@ -6,7 +6,7 @@
     <title>Admin Dashboard - VELORÉ</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="admin.css?v=20260418">
 </head>
 <body>
     <div class="admin-container">
@@ -21,6 +21,9 @@
                 </a>
                 <a href="#" class="sidebar__link" data-tab="orders">
                     <i class="ri-shopping-bag-3-line"></i> Orders
+                </a>
+                <a href="#" class="sidebar__link" data-tab="customers">
+                    <i class="ri-group-line"></i> Customers
                 </a>
                 <a href="index.html" class="sidebar__link logout">
                     <i class="ri-logout-box-line"></i> Back to Site
@@ -86,6 +89,81 @@
                     </table>
                 </div>
             </section>
+
+            <!-- Customers Tab -->
+            <section id="customers-tab" class="tab-content">
+                <header class="content-header">
+                    <div>
+                        <h1>Customer Management</h1>
+                        <p class="content-subtitle">Track customer value, engagement, ordering history, and category overrides.</p>
+                    </div>
+                </header>
+
+                <div class="toolbar toolbar--customers">
+                    <div class="toolbar__group toolbar__group--search">
+                        <label for="customer-search" class="sr-only">Search customers</label>
+                        <input type="search" id="customer-search" placeholder="Search by name or phone">
+                    </div>
+                    <div class="toolbar__group">
+                        <label for="customer-category-filter">Category</label>
+                        <select id="customer-category-filter">
+                            <option value="all">All Categories</option>
+                            <option value="new">New</option>
+                            <option value="returning">Returning</option>
+                            <option value="vip">VIP</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="toolbar__group">
+                        <label for="customer-sort-by">Sort By</label>
+                        <select id="customer-sort-by">
+                            <option value="lastOrderDate">Last Order Date</option>
+                            <option value="totalSpent">Total Spent</option>
+                            <option value="totalOrders">Total Orders</option>
+                            <option value="name">Name</option>
+                        </select>
+                    </div>
+                    <div class="toolbar__group">
+                        <label for="customer-sort-dir">Order</label>
+                        <select id="customer-sort-dir">
+                            <option value="desc">Descending</option>
+                            <option value="asc">Ascending</option>
+                        </select>
+                    </div>
+                    <div class="toolbar__group">
+                        <label for="customer-page-size">Rows</label>
+                        <select id="customer-page-size">
+                            <option value="10">10 per page</option>
+                            <option value="25">25 per page</option>
+                            <option value="50">50 per page</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Total Orders</th>
+                                <th>Total Spent</th>
+                                <th>Last Order Date</th>
+                                <th>Category</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-table-body">
+                            <!-- Customers will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="list-footer">
+                    <p class="list-summary" id="customers-summary"></p>
+                    <div class="pagination" id="customers-pagination"></div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -145,7 +223,34 @@
         </div>
     </div>
 
-    <script src="admin.js"></script>
+    <div class="modal" id="customer-orders-modal">
+        <div class="modal__content modal__content--wide">
+            <div class="modal__header">
+                <div>
+                    <h2 id="customer-orders-title">Customer Orders</h2>
+                    <p id="customer-orders-subtitle" class="modal__subtitle"></p>
+                </div>
+                <i class="ri-close-line modal__close" id="customer-orders-close"></i>
+            </div>
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customer-orders-table-body"></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="customer-orders-pagination"></div>
+        </div>
+    </div>
+
+    <script src="admin.js?v=20260418"></script>
     <script>
       // Auth gate: redirect to login if not authenticated
       (async function() {

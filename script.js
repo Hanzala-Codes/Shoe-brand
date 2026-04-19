@@ -9,12 +9,12 @@ async function fetchProducts() {
         const response = await fetch(`${API_URL}/products`);
         if (!response.ok) throw new Error('Failed to fetch products');
         products = await response.json();
+        console.log('API Response (Products):', products); // Debug log
         renderProducts();
     } catch (error) {
-        console.error('Error loading products:', error);
-        const grid = document.getElementById('product-grid');
-        if (grid) {
-            grid.innerHTML = `<p class="center-text">Error loading products. Please try again later.</p>`;
+        console.error('Error fetching products:', error);
+        if (productGrid) {
+            productGrid.innerHTML = `<p class="center-text">Failed to load products. Please try again later.</p>`;
         }
     }
 }
@@ -184,7 +184,15 @@ function getFilteredProducts() {
         } else if (targetCategory === 'NEW_ARRIVALS') {
             filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         } else if (targetCategory === 'BEST_SELLERS') {
-            filtered = filtered.filter(p => p.best_seller === 1 || p.best_seller === true);
+            const bestSellers = filtered.filter(p => p.best_seller === 1 || p.best_seller === true);
+            
+            if (bestSellers.length > 0) {
+                filtered = bestSellers;
+            } else {
+                // Fallback: If no products marked as best sellers, show top 4 most expensive as "premium" best sellers
+                console.log('No best sellers marked, using price fallback');
+                filtered = [...filtered].sort((a, b) => b.price - a.price).slice(0, 4);
+            }
         }
     }
 
@@ -220,9 +228,13 @@ function renderProducts(productsToRender = getFilteredProducts()) {
     if (!productGrid) return;
     
     if (productsToRender.length === 0) {
+        const message = pageCategory === 'best-sellers' 
+            ? 'No best-selling products available yet.' 
+            : 'No products found matching your selection.';
+            
         productGrid.innerHTML = `
             <div class="center-text" style="grid-column: 1/-1; padding: 4rem 0;">
-                <p>No products found matching your selection.</p>
+                <p>${message}</p>
                 <button class="button button--small" style="margin-top: 1rem" onclick="resetFilters()">Clear Filters</button>
             </div>
         `;
@@ -329,6 +341,7 @@ const cartBtn = document.getElementById('cart-btn'),
       cartClose = document.getElementById('cart-close');
 
 function toggleCart() {
+    if (!cartSidebar || !cartOverlay) return;
     cartSidebar.classList.toggle('open');
     cartOverlay.classList.toggle('open');
 }
@@ -336,6 +349,49 @@ function toggleCart() {
 if(cartBtn) cartBtn.addEventListener('click', toggleCart);
 if(cartClose) cartClose.addEventListener('click', toggleCart);
 if(cartOverlay) cartOverlay.addEventListener('click', toggleCart);
+
+function initFaqAccordion() {
+    const faqItems = document.querySelectorAll('.faq-accordion__item');
+    if (!faqItems.length) return;
+
+    faqItems.forEach((item, index) => {
+        const trigger = item.querySelector('.faq-accordion__trigger');
+        const panel = item.querySelector('.faq-accordion__panel');
+        if (!trigger || !panel) return;
+
+        const panelId = `faq-panel-${index + 1}`;
+        trigger.setAttribute('aria-controls', panelId);
+        panel.id = panelId;
+
+        const setExpandedState = (expanded) => {
+            item.classList.toggle('active', expanded);
+            trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            panel.style.maxHeight = expanded ? `${panel.scrollHeight}px` : '0px';
+        };
+
+        setExpandedState(item.classList.contains('active'));
+
+        trigger.addEventListener('click', () => {
+            const isExpanded = item.classList.contains('active');
+
+            faqItems.forEach(otherItem => {
+                const otherTrigger = otherItem.querySelector('.faq-accordion__trigger');
+                const otherPanel = otherItem.querySelector('.faq-accordion__panel');
+                if (!otherTrigger || !otherPanel) return;
+
+                otherItem.classList.remove('active');
+                otherTrigger.setAttribute('aria-expanded', 'false');
+                otherPanel.style.maxHeight = '0px';
+            });
+
+            if (!isExpanded) {
+                setExpandedState(true);
+            }
+        });
+    });
+}
+
+initFaqAccordion();
 
 /* =============== CHECKOUT LOGIC =============== */
 const checkoutBtn = document.getElementById('checkout-btn'),

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 </head>
-<body>
+<body class="support-page shipping-page">
     <header class="header" id="header">
         <nav class="nav container">
             <a href="index.html" class="nav__logo">VELOCE</a>
@@ -33,22 +33,114 @@
     </header>
 
     <main class="main">
-        <section class="section">
+        <section class="support-hero">
             <div class="container">
-                <h2 class="section__title">Shipping Policy</h2>
-                <p class="section__subtitle">Fast, reliable, and transparent</p>
-                <div class="grid">
-                    <div>
-                        <p class="footer__description">
-                            We ship globally using trusted logistics partners. Orders are processed within 24–48 hours.
-                            Deliveries typically arrive within 3–7 business days depending on your location.
+                <div class="support-hero__grid">
+                    <div class="support-hero__content">
+                        <span class="support-eyebrow">Shipping</span>
+                        <h1 class="support-hero__title">Reliable delivery designed for a premium experience.</h1>
+                        <p class="support-hero__text">
+                            Every VELOCE order is prepared with care, packed with protective detail, and shipped through trusted courier partners so your purchase arrives in impeccable condition.
                         </p>
-                        <ul class="footer__links" style="margin-top:1rem;">
+                        <div class="support-hero__meta">
+                            <div class="support-stat">
+                                <strong>24-48 hrs</strong>
+                                <span>Order processing</span>
+                            </div>
+                            <div class="support-stat">
+                                <strong>3-7 days</strong>
+                                <span>Typical delivery window</span>
+                            </div>
+                            <div class="support-stat">
+                                <strong>Tracked</strong>
+                                <span>Every shipment</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="support-hero__media">
+                        <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?q=80&w=1400&auto=format&fit=crop" alt="Premium packaging and delivery preparation" class="support-hero__image">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="support-section">
+            <div class="container">
+                <div class="support-section__header">
+                    <span class="support-eyebrow">What To Expect</span>
+                    <h2 class="support-section__title">Clear timelines and considered handling.</h2>
+                </div>
+                <div class="support-card-grid support-card-grid--three">
+                    <article class="support-card">
+                        <i class="ri-box-3-line support-card__icon"></i>
+                        <h3 class="support-card__title">Protective Packaging</h3>
+                        <p class="support-card__text">Each pair is packed in signature boxing with protective layers to preserve structure, finish, and presentation.</p>
+                    </article>
+                    <article class="support-card">
+                        <i class="ri-truck-line support-card__icon"></i>
+                        <h3 class="support-card__title">Trusted Couriers</h3>
+                        <p class="support-card__text">We partner with reliable carriers selected for secure handling, route visibility, and dependable transit times.</p>
+                    </article>
+                    <article class="support-card">
+                        <i class="ri-shield-check-line support-card__icon"></i>
+                        <h3 class="support-card__title">Insured Transit</h3>
+                        <p class="support-card__text">Luxury orders are shipped with coverage and monitoring to safeguard your purchase throughout delivery.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="support-section support-section--alt">
+            <div class="container">
+                <div class="support-split">
+                    <div class="support-split__media">
+                        <img src="https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=1400&auto=format&fit=crop" alt="Courier van and parcel handling" class="support-image-card">
+                    </div>
+                    <div class="support-split__content">
+                        <span class="support-eyebrow">Delivery Standards</span>
+                        <h2 class="support-section__title">Shipping designed to feel seamless.</h2>
+                        <p class="support-section__text">
+                            Orders are typically dispatched within one to two business days. Once your package leaves our studio, you receive tracking details by email so you can follow every step with confidence.
+                        </p>
+                        <ul class="support-list">
                             <li>Free shipping on orders over $250</li>
-                            <li>Real-time tracking provided via email</li>
-                            <li>Insured shipments for luxury goods</li>
+                            <li>Real-time tracking shared as soon as dispatch is confirmed</li>
+                            <li>Signature packaging suitable for gifting and safe storage</li>
+                            <li>International transit times vary slightly by destination and customs handling</li>
                         </ul>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="support-section">
+            <div class="container support-container--narrow">
+                <div class="support-section__header">
+                    <span class="support-eyebrow">Process</span>
+                    <h2 class="support-section__title">From atelier to doorstep.</h2>
+                </div>
+                <div class="support-timeline">
+                    <article class="support-timeline__item">
+                        <span class="support-timeline__step">01</span>
+                        <div>
+                            <h3>Order Confirmation</h3>
+                            <p>Your order is reviewed, prepared, and scheduled for dispatch shortly after purchase.</p>
+                        </div>
+                    </article>
+                    <article class="support-timeline__item">
+                        <span class="support-timeline__step">02</span>
+                        <div>
+                            <h3>Careful Packing</h3>
+                            <p>Footwear is boxed and protected to maintain shape, finish, and presentation during transit.</p>
+                        </div>
+                    </article>
+                    <article class="support-timeline__item">
+                        <span class="support-timeline__step">03</span>
+                        <div>
+                            <h3>Tracked Shipment</h3>
+                            <p>Tracking details are shared by email so you can monitor progress from dispatch to delivery.</p>
+                        </div>
+                    </article>
                 </div>
             </div>
         </section>
@@ -95,5 +187,5 @@
     </footer>
 
     <script src="script.js"></script>
-    *** End Patch
-} ***!
+</body>
+</html>

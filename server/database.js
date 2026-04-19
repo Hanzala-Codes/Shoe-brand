@@ -35,12 +35,34 @@ db.serialize(() => {
         address TEXT NOT NULL,
         total_amount REAL NOT NULL,
         items TEXT NOT NULL, -- JSON string of items
+        customer_id INTEGER,
         status TEXT DEFAULT 'Pending',
         best_seller INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
+
+    // Create Customers Table
+    db.run(`CREATE TABLE IF NOT EXISTS customers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        phone TEXT NOT NULL UNIQUE,
+        email TEXT,
+        total_orders INTEGER DEFAULT 0,
+        total_spent REAL DEFAULT 0,
+        last_order_date DATETIME,
+        category TEXT NOT NULL DEFAULT 'new',
+        category_override TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    db.run("CREATE INDEX IF NOT EXISTS idx_orders_phone ON orders(phone)");
+    db.run("CREATE INDEX IF NOT EXISTS idx_orders_email ON orders(email)");
+    db.run("CREATE INDEX IF NOT EXISTS idx_customers_category ON customers(category)");
+    db.run("CREATE INDEX IF NOT EXISTS idx_customers_last_order_date ON customers(last_order_date)");
+    db.run("CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email)");
     
-    // Ensure best_seller column exists
+    // Ensure best_seller column exists and has some data
     db.all("PRAGMA table_info(products)", (err, rows) => {
         if (!err) {
             const hasBest = rows.some(r => r.name === 'best_seller');
@@ -49,11 +71,64 @@ db.serialize(() => {
                     if (alterErr) {
                         console.error('Failed to add best_seller column:', alterErr.message);
                     } else {
-                        db.run("UPDATE products SET best_seller = 1 WHERE name IN ('Urban Runner','Oxford Classic','Velvet Ease')", [], function(updateErr) {
-                            if (updateErr) {
-                                console.error('Failed to mark best sellers:', updateErr.message);
-                            }
-                        });
+                        markInitialBestSellers();
+                    }
+                });
+            } else {
+                // If column exists, check if we have any best sellers, if not, mark some
+                db.get("SELECT COUNT(*) as count FROM products WHERE best_seller = 1", (countErr, row) => {
+                    if (!countErr && row.count === 0) {
+                        markInitialBestSellers();
+                    }
+                });
+            }
+        }
+    });
+
+    function markInitialBestSellers() {
+        db.run("UPDATE products SET best_seller = 1 WHERE name IN ('Urban Runner','Oxford Classic','Velvet Ease', 'Golden Hour')", [], function(updateErr) {
+            if (updateErr) {
+                console.error('Failed to mark best sellers:', updateErr.message);
+            } else {
+                console.log('Successfully marked initial best sellers');
+            }
+        });
+    }
+
+    db.all("PRAGMA table_info(orders)", (err, rows) => {
+        if (!err) {
+            const hasCustomerId = rows.some(r => r.name === 'customer_id');
+            if (!hasCustomerId) {
+                db.run("ALTER TABLE orders ADD COLUMN customer_id INTEGER", [], function(alterErr) {
+                    if (alterErr) {
+                        console.error('Failed to add customer_id column to orders:', alterErr.message);
+                    } else {
+                        db.run("CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id)");
+                    }
+                });
+            } else {
+                db.run("CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id)");
+            }
+        }
+    });
+
+    db.all("PRAGMA table_info(customers)", (err, rows) => {
+        if (!err) {
+            const hasCategoryOverride = rows.some(r => r.name === 'category_override');
+            const hasUpdatedAt = rows.some(r => r.name === 'updated_at');
+
+            if (!hasCategoryOverride) {
+                db.run("ALTER TABLE customers ADD COLUMN category_override TEXT", [], function(alterErr) {
+                    if (alterErr) {
+                        console.error('Failed to add category_override column to customers:', alterErr.message);
+                    }
+                });
+            }
+
+            if (!hasUpdatedAt) {
+                db.run("ALTER TABLE customers ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP", [], function(alterErr) {
+                    if (alterErr) {
+                        console.error('Failed to add updated_at column to customers:', alterErr.message);
                     }
                 });
             }

@@ -7,6 +7,18 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const db = require('./database');
+const {
+    backfillCustomersFromOrders,
+    dbAll,
+    dbGet,
+    dbRun,
+    getCustomerOrders,
+    refreshCustomerCategories,
+    setCustomerCategoryOverride,
+    toCustomerResponse,
+    upsertCustomerFromOrder
+} = require('./customers');
+const { getWhatsAppDiagnostics, sendOrderWhatsAppNotification } = require('./whatsapp');
 const processEnv = process.env;
 
 const app = express();
@@ -144,8 +156,15 @@ function adminAuth(req, res, next) {
 // --- API ROUTES ---
 
 // --- STATIC (Protected Admin) ---
-// const FRONTEND_DIR = path.join(__dirname, '..');
-const FRONTEND_DIR = path.join(__dirname)
+const FRONTEND_DIR = path.join(__dirname, '..');
+const ADMIN_NO_CACHE_HEADER = 'no-store, no-cache, must-revalidate, private';
+
+function sendNoCacheFile(res, filePath) {
+  res.setHeader('Cache-Control', ADMIN_NO_CACHE_HEADER);
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.sendFile(filePath);
+}
 
 app.get('/admin/login', (req, res) => {
   res.sendFile(path.join(FRONTEND_DIR, 'admin', 'login', 'index.html'));
@@ -159,7 +178,15 @@ app.get('/admin.html', (req, res) => {
     res.redirect('/admin/login');
     return;
   }
-  res.sendFile(path.join(FRONTEND_DIR, 'admin.html'));
+  sendNoCacheFile(res, path.join(FRONTEND_DIR, 'admin.html'));
+});
+
+app.get('/admin.js', (req, res) => {
+  sendNoCacheFile(res, path.join(FRONTEND_DIR, 'admin.js'));
+});
+
+app.get('/admin.css', (req, res) => {
+  sendNoCacheFile(res, path.join(FRONTEND_DIR, 'admin.css'));
 });
 
 // Gate all /admin/* except /admin/login
@@ -195,6 +222,10 @@ app.get('/api/_env', (req, res) => {
     user_len: user.length,
     pass_len: pass.length
   });
+});
+
+app.get('/api/_whatsapp', (req, res) => {
+  res.json(getWhatsAppDiagnostics());
 });
 
 // Admin login
@@ -241,6 +272,120 @@ app.get('/api/admin/me', (req, res) => {
     return;
   }
   res.json({ email: payload.email });
+});
+
+app.get('/api/customers', adminAuth, async (req, res) => {
+  try {
+    await backfillCustomersFromOrders(db);
+    await refreshCustomerCategories(db);
+
+    const search = (req.query.search || '').trim();
+    const category = (req.query.category || 'all').trim().toLowerCase();
+    const sortBy = (req.query.sortBy || 'lastOrderDate').trim();
+    const sortDir = (req.query.sortDir || 'desc').trim().toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+    const page = Math.max(parseInt(req.query.page || '1', 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit || '10', 10) || 10, 1), 100);
+    const offset = (page - 1) * limit;
+
+    const sortMap = {
+      totalSpent: 'total_spent',
+      totalOrders: 'total_orders',
+      lastOrderDate: 'last_order_date',
+      createdAt: 'created_at',
+      name: 'name'
+    };
+    const orderColumn = sortMap[sortBy] || 'last_order_date';
+
+    const conditions = [];
+    const params = [];
+
+    if (category && category !== 'all') {
+      conditions.push('category = ?');
+      params.push(category);
+    }
+
+    if (search) {
+      conditions.push('(name LIKE ? OR phone LIKE ?)');
+      params.push(`%${search}%`, `%${search}%`);
+    }
+
+    const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    const totalRow = await dbGet(
+      db,
+      `SELECT COUNT(*) AS count FROM customers ${whereClause}`,
+      params
+    );
+
+    const rows = await dbAll(
+      db,
+      `SELECT *
+       FROM customers
+       ${whereClause}
+       ORDER BY ${orderColumn} ${sortDir}, id DESC
+       LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
+    );
+
+    res.json({
+      items: rows.map(toCustomerResponse),
+      pagination: {
+        page,
+        limit,
+        total: totalRow ? totalRow.count : 0,
+        totalPages: totalRow ? Math.max(1, Math.ceil(totalRow.count / limit)) : 1
+      }
+    });
+  } catch (error) {
+    console.error('Failed to load customers:', error.message);
+    res.status(500).json({ error: 'Failed to load customers' });
+  }
+});
+
+app.put('/api/customers/:id/category', adminAuth, async (req, res) => {
+  try {
+    const customerId = parseInt(req.params.id, 10);
+    if (!Number.isFinite(customerId)) {
+      res.status(400).json({ error: 'Invalid customer id' });
+      return;
+    }
+
+    const updatedCustomer = await setCustomerCategoryOverride(db, customerId, req.body.category);
+    if (!updatedCustomer) {
+      res.status(404).json({ error: 'Customer not found' });
+      return;
+    }
+
+    res.json({
+      message: 'Customer category updated',
+      customer: updatedCustomer
+    });
+  } catch (error) {
+    console.error('Failed to update customer category:', error.message);
+    res.status(400).json({ error: error.message || 'Failed to update customer category' });
+  }
+});
+
+app.get('/api/customers/:id/orders', adminAuth, async (req, res) => {
+  try {
+    await backfillCustomersFromOrders(db);
+    const customerId = parseInt(req.params.id, 10);
+    if (!Number.isFinite(customerId)) {
+      res.status(400).json({ error: 'Invalid customer id' });
+      return;
+    }
+
+    const result = await getCustomerOrders(db, customerId, req.query.page, req.query.limit);
+    if (!result) {
+      res.status(404).json({ error: 'Customer not found' });
+      return;
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('Failed to load customer orders:', error.message);
+    res.status(500).json({ error: 'Failed to load customer orders' });
+  }
 });
 
 // Admin logout
@@ -292,10 +437,7 @@ app.get('/api/products', (req, res) => {
 app.post('/api/products', adminAuth, upload.single('image'), (req, res) => {
     const { name, category, price, description, stock } = req.body;
     // If an image is uploaded, use the local path; otherwise use a placeholder or provided URL
-    // const imagePath = req.file ? `http://localhost:${PORT}/uploads/${req.file.filename}` : req.body.imageUrl;
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-const imagePath = req.file ? `${baseUrl}/uploads/${req.file.filename}` : req.body.imageUrl;
-
+    const imagePath = req.file ? `http://localhost:${PORT}/uploads/${req.file.filename}` : req.body.imageUrl;
     const hoverImage = req.body.hoverImage || imagePath; // Simplify for now
 
     const sql = "INSERT INTO products (name, category, price, image, hoverImage, description, stock) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -345,55 +487,114 @@ app.delete('/api/products/:id', adminAuth, (req, res) => {
     });
 });
 
-// 5. Place Order & Send Email
-app.post('/api/orders', (req, res) => {
+// 5. Place Order & Send Notifications
+app.post('/api/orders', async (req, res) => {
     const { customer_name, email, phone, address, total_amount, items } = req.body;
-    const itemsJson = JSON.stringify(items);
+    const normalizedItems = Array.isArray(items) ? items : [];
+    const numericTotalAmount = Number(total_amount);
 
+    if (!customer_name || !phone || !address) {
+        res.status(400).json({ error: 'Customer name, phone, and address are required' });
+        return;
+    }
+
+    if (!normalizedItems.length) {
+        res.status(400).json({ error: 'At least one order item is required' });
+        return;
+    }
+
+    if (!Number.isFinite(numericTotalAmount) || numericTotalAmount < 0) {
+        res.status(400).json({ error: 'A valid total amount is required' });
+        return;
+    }
+
+    const itemsJson = JSON.stringify(normalizedItems);
     const sql = "INSERT INTO orders (customer_name, email, phone, address, total_amount, items) VALUES (?, ?, ?, ?, ?, ?)";
-    const params = [customer_name, email, phone, address, total_amount, itemsJson];
+    const params = [customer_name, email, phone, address, numericTotalAmount, itemsJson];
 
-    db.run(sql, params, function(err) {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        
-        const orderId = this.lastID;
+    let orderId = null;
+    let committed = false;
 
-        // Send Email to Admin
-        const adminEmail = 'hanzalak395@gmail.com';
-        const orderItemsList = items.map(it => `${it.qty}x ${it.name} - $${(it.price * it.qty).toFixed(2)}`).join('\n');
-        const htmlList = items.map(it => `<li>${it.qty}x ${it.name} - $${(it.price * it.qty).toFixed(2)}</li>`).join('');
-        const mailOptions = {
-            from: processEnv.SMTP_USER || 'no-reply@veloce.store',
-            to: adminEmail,
-            subject: `New Order #${orderId} - ${customer_name}`,
-            text: `Order #${orderId}\n\nCustomer: ${customer_name}\nEmail: ${email}\nPhone: ${phone}\nAddress: ${address}\n\nItems:\n${orderItemsList}\n\nTotal: $${total_amount.toFixed ? total_amount.toFixed(2) : total_amount}`,
-            html: `<h2>Order #${orderId}</h2>
-                   <p><strong>Customer:</strong> ${customer_name}</p>
-                   <p><strong>Email:</strong> ${email}</p>
-                   <p><strong>Phone:</strong> ${phone}</p>
-                   <p><strong>Address:</strong> ${address}</p>
-                   <h3>Items</h3>
-                   <ul>${htmlList}</ul>
-                   <p><strong>Total:</strong> $${total_amount.toFixed ? total_amount.toFixed(2) : total_amount}</p>`
-        };
-        if (!transporter) {
-            transporter = createTransporter();
-        }
-        if (transporter) {
-            transporter.sendMail(mailOptions).catch(err => {
-                console.error('Email send failed:', err.message);
-            });
-        } else {
-            console.log('[EMAIL NOTICE] SMTP credentials not set. Skipping email send. Payload:', mailOptions);
-        }
-        
-        res.json({
-            message: "Order placed successfully!",
-            orderId: orderId
+    try {
+        await dbRun(db, 'BEGIN IMMEDIATE TRANSACTION');
+
+        const insertResult = await dbRun(db, sql, params);
+        orderId = insertResult.lastID;
+
+        const storedOrder = await dbGet(
+            db,
+            "SELECT created_at FROM orders WHERE id = ?",
+            [orderId]
+        );
+
+        await upsertCustomerFromOrder(db, {
+            orderId,
+            customer_name,
+            email,
+            phone,
+            total_amount: numericTotalAmount,
+            orderDate: storedOrder ? storedOrder.created_at : undefined
         });
+
+        await dbRun(db, 'COMMIT');
+        committed = true;
+    } catch (error) {
+        if (!committed) {
+            try {
+                await dbRun(db, 'ROLLBACK');
+            } catch (rollbackError) {
+                console.error('Order rollback failed:', rollbackError.message);
+            }
+        }
+
+        console.error('Failed to place order:', error.message);
+        res.status(500).json({ error: 'Failed to place order' });
+        return;
+    }
+
+    // Send Email to Admin
+    const adminEmail = 'hanzalak395@gmail.com';
+    const orderItemsList = normalizedItems.map(it => `${it.qty}x ${it.name} - $${(it.price * it.qty).toFixed(2)}`).join('\n');
+    const htmlList = normalizedItems.map(it => `<li>${it.qty}x ${it.name} - $${(it.price * it.qty).toFixed(2)}</li>`).join('');
+    const mailOptions = {
+        from: processEnv.SMTP_USER || 'no-reply@veloce.store',
+        to: adminEmail,
+        subject: `New Order #${orderId} - ${customer_name}`,
+        text: `Order #${orderId}\n\nCustomer: ${customer_name}\nEmail: ${email}\nPhone: ${phone}\nAddress: ${address}\n\nItems:\n${orderItemsList}\n\nTotal: $${numericTotalAmount.toFixed(2)}`,
+        html: `<h2>Order #${orderId}</h2>
+               <p><strong>Customer:</strong> ${customer_name}</p>
+               <p><strong>Email:</strong> ${email}</p>
+               <p><strong>Phone:</strong> ${phone}</p>
+               <p><strong>Address:</strong> ${address}</p>
+               <h3>Items</h3>
+               <ul>${htmlList}</ul>
+               <p><strong>Total:</strong> $${numericTotalAmount.toFixed(2)}</p>`
+    };
+    if (!transporter) {
+        transporter = createTransporter();
+    }
+    if (transporter) {
+        transporter.sendMail(mailOptions).catch(err => {
+            console.error('Email send failed:', err.message);
+        });
+    } else {
+        console.log('[EMAIL NOTICE] SMTP credentials not set. Skipping email send. Payload:', mailOptions);
+    }
+
+    sendOrderWhatsAppNotification({
+        orderId,
+        customer_name,
+        phone,
+        address,
+        total_amount: numericTotalAmount,
+        items: normalizedItems
+    }).catch(err => {
+        console.error('WhatsApp send failed:', err.message);
+    });
+
+    res.json({
+        message: "Order placed successfully!",
+        orderId: orderId
     });
 });
 
@@ -462,41 +663,19 @@ app.get('/api/orders', adminAuth, (req, res) => {
     });
 });
 
-// // Static assets fallback
-// app.use('/', express.static(FRONTEND_DIR));
-
-// // Start Server
-// app.listen(PORT, '0.0.0.0', () => {
-//     console.log(`Server running on port ${PORT}`);
-// });
-
-// Serve uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Serve admin (protected) static files
-app.use('/admin', (req, res, next) => {
-  if (req.path.startsWith('/login')) return next();
-  const cookies = parseCookies(req);
-  const token = cookies['admin_token'];
-  const payload = token ? verifyToken(token) : null;
-  if (!payload || payload.email !== ADMIN_EMAIL) {
-    res.redirect('/admin/login');
-    return;
-  }
-  next();
-}, express.static(path.join(FRONTEND_DIR, 'admin')));
-
-// Serve root static files (your index.html)
-app.use(express.static(FRONTEND_DIR));
-
-// SPA fallback for frontend routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
-});
+// Static assets fallback
+app.use('/', express.static(FRONTEND_DIR));
 
 // Start Server
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-});
+(async () => {
+    try {
+        await backfillCustomersFromOrders(db);
+        await refreshCustomerCategories(db);
+    } catch (error) {
+        console.error('Customer initialization failed:', error.message);
+    }
 
-
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+})();

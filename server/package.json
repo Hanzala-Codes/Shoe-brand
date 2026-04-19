@@ -1,14 +1,10 @@
 {
-  "name": "server",
+  "name": "veloce-store",
   "version": "1.0.0",
-  "description": "",
-  "main": "server/server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node server/server.js"
+    "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
@@ -16,6 +12,6 @@
     "multer": "^2.0.2",
     "nodemailer": "^8.0.0",
     "sqlite3": "^5.1.7",
-    "twilio": "^5.10.4"
+    "twilio": "^5.13.1"
   }
 }
