@@ -1288,9 +1288,19 @@ body.dark-theme .marquee-item span {
   }
 
   /* Modal & Cart */
+  .header {
+    z-index: 1100; /* Higher than cart sidebar on mobile */
+  }
+
   .cart {
     width: 100%;
     right: -100%;
+    top: var(--header-height);
+    height: calc(100% - var(--header-height));
+  }
+
+  .cart__overlay {
+    top: var(--header-height);
   }
 
   .modal__content {
