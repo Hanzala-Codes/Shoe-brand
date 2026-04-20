@@ -22,9 +22,26 @@ db.serialize(() => {
         hoverImage TEXT,
         description TEXT,
         stock INTEGER DEFAULT 100,
+        sizes TEXT, -- JSON array of sizes
+        colors TEXT, -- JSON array of colors
         best_seller INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
+
+    // Ensure sizes and colors columns exist
+    db.all("PRAGMA table_info(products)", (err, rows) => {
+        if (!err) {
+            const hasSizes = rows.some(r => r.name === 'sizes');
+            const hasColors = rows.some(r => r.name === 'colors');
+            
+            if (!hasSizes) {
+                db.run("ALTER TABLE products ADD COLUMN sizes TEXT");
+            }
+            if (!hasColors) {
+                db.run("ALTER TABLE products ADD COLUMN colors TEXT");
+            }
+        }
+    });
 
     // Create Orders Table
     db.run(`CREATE TABLE IF NOT EXISTS orders (

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - VELORÉ</title>
+    <title>Admin Dashboard - CROOCS</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="admin.css?v=20260418">
@@ -13,7 +13,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar__logo">
-                <h2>VELORÉ <span>Admin</span></h2>
+                <h2>CROOCS <span>Admin</span></h2>
             </div>
             <nav class="sidebar__nav">
                 <a href="#" class="sidebar__link active" data-tab="products">
@@ -206,6 +206,34 @@
                 <div class="form-group">
                     <label>Description</label>
                     <textarea id="p-description" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Available Sizes</label>
+                    <div class="checkbox-group" id="p-sizes-group">
+                        <label><input type="checkbox" value="39"> 39</label>
+                        <label><input type="checkbox" value="40"> 40</label>
+                        <label><input type="checkbox" value="41"> 41</label>
+                        <label><input type="checkbox" value="42"> 42</label>
+                        <label><input type="checkbox" value="43"> 43</label>
+                        <label><input type="checkbox" value="44"> 44</label>
+                        <label><input type="checkbox" value="45"> 45</label>
+                        <label><input type="checkbox" value="46"> 46</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Available Colors</label>
+                    <div class="color-mgmt">
+                        <div class="color-mgmt__input-wrapper">
+                            <input type="text" id="p-color-input" placeholder="Type a color and press Enter">
+                            <button type="button" class="btn btn--secondary btn--small" id="add-color-btn">Add</button>
+                        </div>
+                        <div class="color-mgmt__tags" id="p-colors-tags">
+                            <!-- Tags will be injected here -->
+                        </div>
+                        <input type="hidden" id="p-colors" value="[]">
+                    </div>
                 </div>
 
                 <div class="form-group">

@@ -50,6 +50,14 @@ const customerOrdersSubtitle = document.getElementById('customer-orders-subtitle
 const customerOrdersTableBody = document.getElementById('customer-orders-table-body');
 const customerOrdersPagination = document.getElementById('customer-orders-pagination');
 
+// Color Mgmt Elements
+const colorInput = document.getElementById('p-color-input');
+const addColorBtn = document.getElementById('add-color-btn');
+const colorsTagsContainer = document.getElementById('p-colors-tags');
+const hiddenColorsInput = document.getElementById('p-colors');
+
+let selectedColors = [];
+
 document.addEventListener('DOMContentLoaded', () => {
     loadProducts();
     loadOrders();
@@ -160,7 +168,57 @@ function setupEventListeners() {
     if (customerOrdersClose) {
         customerOrdersClose.addEventListener('click', closeCustomerOrdersModal);
     }
+
+    if (addColorBtn) {
+        addColorBtn.addEventListener('click', () => {
+            const color = colorInput.value.trim();
+            if (color) addColorTag(color);
+        });
+    }
+
+    if (colorInput) {
+        colorInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const color = colorInput.value.trim();
+                if (color) addColorTag(color);
+            }
+        });
+    }
 }
+
+function addColorTag(color) {
+    if (selectedColors.includes(color)) {
+        colorInput.value = '';
+        return;
+    }
+
+    selectedColors.push(color);
+    renderColorTags();
+    colorInput.value = '';
+    updateHiddenColors();
+}
+
+function removeColorTag(color) {
+    selectedColors = selectedColors.filter(c => c !== color);
+    renderColorTags();
+    updateHiddenColors();
+}
+
+function renderColorTags() {
+    colorsTagsContainer.innerHTML = selectedColors.map(color => `
+        <div class="color-tag">
+            <span>${escapeHtml(color)}</span>
+            <span class="color-tag__remove" onclick="removeColorTag('${escapeHtml(color)}')">&times;</span>
+        </div>
+    `).join('');
+}
+
+function updateHiddenColors() {
+    hiddenColorsInput.value = JSON.stringify(selectedColors);
+}
+
+window.removeColorTag = removeColorTag;
 
 function debounce(callback, waitMs) {
     let timeoutId = null;
@@ -263,6 +321,13 @@ async function handleFormSubmit(e) {
     formData.append('stock', document.getElementById('p-stock').value);
     formData.append('description', document.getElementById('p-description').value);
 
+    // Get selected sizes
+    const selectedSizes = Array.from(document.querySelectorAll('#p-sizes-group input:checked')).map(cb => cb.value);
+    formData.append('sizes', JSON.stringify(selectedSizes));
+
+    // Get colors (already updated in selectedColors array)
+    formData.append('colors', JSON.stringify(selectedColors));
+
     const fileInput = document.getElementById('p-image-file');
     const urlInput = document.getElementById('p-image-url');
 
@@ -298,6 +363,15 @@ function openAddModal() {
     currentProductId = null;
     modalTitle.textContent = 'Add New Product';
     productForm.reset();
+    
+    // Clear checkboxes
+    document.querySelectorAll('#p-sizes-group input').forEach(cb => cb.checked = false);
+    
+    // Clear colors
+    selectedColors = [];
+    renderColorTags();
+    updateHiddenColors();
+    
     productModal.classList.add('open');
 }
 
@@ -315,6 +389,25 @@ async function openEditModal(id) {
         document.getElementById('p-price').value = product.price;
         document.getElementById('p-stock').value = product.stock;
         document.getElementById('p-description').value = product.description || '';
+        
+        // Helper to safely parse JSON or return array
+        const safeParse = (data) => {
+            if (!data) return [];
+            if (Array.isArray(data)) return data;
+            try { return JSON.parse(data); } catch(e) { return []; }
+        };
+
+        // Set sizes
+        const sizes = safeParse(product.sizes);
+        document.querySelectorAll('#p-sizes-group input').forEach(cb => {
+            cb.checked = sizes.includes(cb.value);
+        });
+
+        // Set colors
+        selectedColors = safeParse(product.colors);
+        renderColorTags();
+        updateHiddenColors();
+
         document.getElementById('p-image-file').value = '';
         document.getElementById('p-image-url').value = product.image || '';
 
@@ -368,7 +461,18 @@ function renderOrders(orders) {
     }
 
     ordersTableBody.innerHTML = orders.map(order => {
-        const itemsList = order.items.map(item => `<div>${Number(item.qty || 0)}x ${escapeHtml(item.name)}</div>`).join('');
+        const itemsList = order.items.map(item => `
+            <div class="order-item">
+                <span class="order-item__qty">${Number(item.qty || 0)}x</span> 
+                <span class="order-item__name">${escapeHtml(item.name)}</span>
+                ${item.size || item.color ? `
+                    <div class="order-item__variant">
+                        ${item.size ? `Size: ${item.size}` : ''} 
+                        ${item.color ? `| Color: ${item.color}` : ''}
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
 
         return `
             <tr>
@@ -616,7 +720,20 @@ function renderCustomerOrders(orders) {
         <tr>
             <td>#${order.id}</td>
             <td>${formatDate(order.created_at)}</td>
-            <td>${order.items.map(item => `<div>${Number(item.qty || 0)}x ${escapeHtml(item.name)}</div>`).join('')}</td>
+            <td>
+                ${order.items.map(item => `
+                    <div class="order-item">
+                        <span class="order-item__qty">${Number(item.qty || 0)}x</span> 
+                        <span class="order-item__name">${escapeHtml(item.name)}</span>
+                        ${item.size || item.color ? `
+                            <div class="order-item__variant">
+                                ${item.size ? `Size: ${item.size}` : ''} 
+                                ${item.color ? `| Color: ${item.color}` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('')}
+            </td>
             <td>${formatCustomerCurrency(order.total_amount)}</td>
             <td><span class="badge badge--order badge--${String(order.status || '').toLowerCase()}">${escapeHtml(order.status)}</span></td>
         </tr>

@@ -6,10 +6,11 @@ const pageCategory = document.body.getAttribute('data-page');
 
 async function fetchProducts() {
     try {
-        const response = await fetch(`${API_URL}/products`);
+        // Add timestamp to prevent caching
+        const response = await fetch(`${API_URL}/products?t=${Date.now()}`);
         if (!response.ok) throw new Error('Failed to fetch products');
         products = await response.json();
-        console.log('API Response (Products):', products); // Debug log
+        console.log('Fetched products with variants:', products.map(p => ({ name: p.name, sizes: p.sizes, colors: p.colors })));
         renderProducts();
     } catch (error) {
         console.error('Error fetching products:', error);
@@ -34,46 +35,218 @@ class ShoppingCart {
     }
 
     init() {
+        // Migration: Ensure all cart items have a variantId for proper removal/update
+        let updated = false;
+        this.cart = this.cart.map(item => {
+            if (!item.variantId) {
+                const size = item.selectedSize || 'Standard';
+                const color = item.selectedColor || 'Default';
+                item.variantId = `${item.id}-${size}-${color}`;
+                item.selectedSize = size;
+                item.selectedColor = color;
+                updated = true;
+            }
+            return item;
+        });
+        
+        if (updated) this.save();
+        
         this.renderCart();
         this.updateCount();
     }
 
-    add(productId) {
-        const product = products.find(p => p.id === productId);
+    add(productId, size = null, color = null) {
+        // Use == for flexible ID comparison
+        const product = products.find(p => p.id == productId);
         if (!product) return;
 
-        const existingItem = this.cart.find(item => item.id === productId);
+        // If product has sizes or colors but they aren't selected, we need to show selection UI
+        // However, the current requirement is to select from product card.
+        // For simplicity, we'll assume the caller passes size/color or we show a prompt.
+        
+        if (!size || !color) {
+            this.openQuickView(product.id);
+            return;
+        }
+
+        const variantId = `${productId}-${size}-${color}`;
+        const existingItem = this.cart.find(item => item.variantId === variantId);
+        
         if (existingItem) {
             existingItem.qty++;
         } else {
-            this.cart.push({ ...product, qty: 1 });
+            this.cart.push({ 
+                ...product, 
+                variantId,
+                selectedSize: size, 
+                selectedColor: color,
+                qty: 1 
+            });
         }
 
         this.save();
         this.renderCart();
         this.updateCount();
         this.showFeedback();
+        
+        // Close modal if open
+        const modal = document.getElementById('quick-view-modal');
+        if (modal) modal.classList.remove('open');
     }
 
-    remove(productId) {
-        this.cart = this.cart.filter(item => item.id !== productId);
+    remove(variantId) {
+        this.cart = this.cart.filter(item => item.variantId !== variantId);
         this.save();
         this.renderCart();
         this.updateCount();
     }
 
-    updateQty(productId, change) {
-        const item = this.cart.find(item => item.id === productId);
+    updateQty(variantId, change) {
+        // variantId is a string like "1-42-Black", so strict comparison is fine
+        const item = this.cart.find(item => item.variantId === variantId);
         if (!item) return;
 
         item.qty += change;
         if (item.qty <= 0) {
-            this.remove(productId);
+            this.remove(variantId);
         } else {
             this.save();
             this.renderCart();
             this.updateCount();
         }
+    }
+
+    openQuickView(productId) {
+        // Ensure products are loaded
+        if (!products || products.length === 0) {
+            console.warn('Products not loaded yet');
+            return;
+        }
+
+        // Use == to allow string/number comparison for ID
+        const product = products.find(p => p.id == productId);
+        if (!product) {
+            console.error('Product not found:', productId);
+            return;
+        }
+
+        let quickViewModal = document.getElementById('quick-view-modal');
+        if (!quickViewModal) {
+            quickViewModal = document.createElement('div');
+            quickViewModal.id = 'quick-view-modal';
+            quickViewModal.className = 'modal';
+            document.body.appendChild(quickViewModal);
+        }
+
+        // Helper to safely parse sizes/colors which might be strings or arrays
+        const parseVariant = (data) => {
+            if (!data) return [];
+            if (Array.isArray(data)) return data;
+            try {
+                const parsed = JSON.parse(data);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                // If it's a comma-separated string instead of JSON
+                if (typeof data === 'string' && data.includes(',')) {
+                    return data.split(',').map(s => s.trim());
+                }
+                return data ? [data] : [];
+            }
+        };
+
+        const sizes = parseVariant(product.sizes);
+        const colors = parseVariant(product.colors);
+
+        console.log(`Displaying variants for ${product.name}:`, { sizes, colors });
+
+        quickViewModal.innerHTML = `
+            <div class="modal__content quick-view">
+                <i class="ri-close-line modal__close" onclick="document.getElementById('quick-view-modal').classList.remove('open')"></i>
+                <div class="quick-view__grid">
+                    <div class="quick-view__image">
+                        <img src="${product.image}" alt="${product.name}">
+                    </div>
+                    <div class="quick-view__info">
+                        <h2 class="quick-view__title">${product.name}</h2>
+                        <span class="quick-view__price">$${product.price}</span>
+                        <p class="quick-view__description">${product.description || 'Luxury handcrafted footwear.'}</p>
+                        
+                        <div class="variant-selection">
+                            ${sizes.length > 0 ? `
+                            <div class="variant-group">
+                                <span class="variant-label">Select Size</span>
+                                <div class="variant-options size-options">
+                                    ${sizes.map(s => `
+                                        <button class="variant-btn size-btn" data-size="${s}">${s}</button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${colors.length > 0 ? `
+                            <div class="variant-group">
+                                <span class="variant-label">Select Color</span>
+                                <div class="variant-options color-options">
+                                    ${colors.map(c => `
+                                        <button class="variant-btn color-btn" data-color="${c}">${c}</button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
+
+                            ${sizes.length === 0 && colors.length === 0 ? `
+                                <p style="margin-bottom: 2rem; color: var(--text-color-light);">This product is currently only available in standard options.</p>
+                            ` : ''}
+                        </div>
+
+                        <div id="variant-error" class="error-message" style="display:none; color: #ff4d4d; margin-bottom: 1rem; font-size: 0.9rem;">
+                            Please select ${sizes.length > 0 ? 'size' : ''} ${sizes.length > 0 && colors.length > 0 ? 'and' : ''} ${colors.length > 0 ? 'color' : ''}
+                        </div>
+
+                        <button class="button quick-view__add-btn" id="quick-add-btn">
+                            Add to Bag
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Wait a bit for the DOM to update before showing
+        setTimeout(() => quickViewModal.classList.add('open'), 10);
+
+        // Setup Selection Logic
+        let selectedSize = sizes.length === 0 ? 'Standard' : null;
+        let selectedColor = colors.length === 0 ? 'Default' : null;
+
+        const sizeBtns = quickViewModal.querySelectorAll('.size-btn');
+        const colorBtns = quickViewModal.querySelectorAll('.color-btn');
+        const errorMsg = quickViewModal.querySelector('#variant-error');
+
+        sizeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                sizeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedSize = btn.dataset.size;
+                errorMsg.style.display = 'none';
+            });
+        });
+
+        colorBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                colorBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedColor = btn.dataset.color;
+                errorMsg.style.display = 'none';
+            });
+        });
+
+        quickViewModal.querySelector('#quick-add-btn').addEventListener('click', () => {
+            if (!selectedSize || !selectedColor) {
+                errorMsg.style.display = 'block';
+                return;
+            }
+            this.add(product.id, selectedSize, selectedColor);
+        });
     }
 
     clear() {
@@ -118,23 +291,28 @@ class ShoppingCart {
             return;
         }
 
-        this.cartContent.innerHTML = this.cart.map(item => `
+        this.cartContent.innerHTML = this.cart.map(item => {
+            // Escape single quotes for the inline JS onclick handler
+            const safeVariantId = String(item.variantId).replace(/'/g, "\\'");
+            
+            return `
             <div class="cart__item">
                 <img src="${item.image}" alt="${item.name}" class="cart__img">
                 <div class="cart__item-info">
                     <h4>${item.name}</h4>
+                    <span class="cart__item-variant">Size: ${item.selectedSize} | Color: ${item.selectedColor}</span>
                     <span class="cart__item-price">$${item.price.toFixed(2)}</span>
                     <div class="cart__item-actions">
-                        <button class="cart__qty-btn" onclick="cart.updateQty(${item.id}, -1)">-</button>
+                        <button class="cart__qty-btn" onclick="cart.updateQty('${safeVariantId}', -1)">-</button>
                         <span>${item.qty}</span>
-                        <button class="cart__qty-btn" onclick="cart.updateQty(${item.id}, 1)">+</button>
+                        <button class="cart__qty-btn" onclick="cart.updateQty('${safeVariantId}', 1)">+</button>
                     </div>
                 </div>
-                <div class="cart__remove" onclick="cart.remove(${item.id})">
+                <div class="cart__remove" onclick="cart.remove('${safeVariantId}')">
                     <i class="ri-delete-bin-line"></i>
                 </div>
             </div>
-        `).join('');
+        `;}).join('');
     }
 
     showFeedback() {
@@ -241,25 +419,28 @@ function renderProducts(productsToRender = getFilteredProducts()) {
         return;
     }
 
-    productGrid.innerHTML = productsToRender.map(product => `
+    productGrid.innerHTML = productsToRender.map(product => {
+        // Find the actual product object from the products array to ensure we have size/color data
+        const productData = products.find(p => p.id === product.id) || product;
+        return `
         <article class="product-card">
             <div class="product__img-box">
-                <img src="${product.image}" alt="${product.name}" class="product__img">
+                <img src="${productData.image}" alt="${productData.name}" class="product__img">
                 <div class="product__actions">
-                    <button class="add-to-cart-btn" onclick="cart.add(${product.id})">
-                        Add to Cart - $${product.price}
+                    <button class="add-to-cart-btn" onclick="cart.openQuickView(${productData.id})">
+                        Quick Add - $${productData.price}
                     </button>
                 </div>
             </div>
             <div class="product__info">
                 <div>
-                    <h3 class="product__title">${product.name}</h3>
-                    <span class="product__category">${product.category}</span>
+                    <h3 class="product__title">${productData.name}</h3>
+                    <span class="product__category">${productData.category}</span>
                 </div>
-                <span class="product__price">$${product.price}</span>
+                <span class="product__price">$${productData.price}</span>
             </div>
         </article>
-    `).join('');
+    `;}).join('');
     
     // Re-trigger animations
     if(window.observer) {

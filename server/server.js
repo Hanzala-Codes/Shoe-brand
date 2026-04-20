@@ -435,13 +435,13 @@ app.get('/api/products', (req, res) => {
 
 // 2. Add New Product (Admin)
 app.post('/api/products', adminAuth, upload.single('image'), (req, res) => {
-    const { name, category, price, description, stock } = req.body;
+    const { name, category, price, description, stock, sizes, colors } = req.body;
     // If an image is uploaded, use the local path; otherwise use a placeholder or provided URL
     const imagePath = req.file ? `http://localhost:${PORT}/uploads/${req.file.filename}` : req.body.imageUrl;
     const hoverImage = req.body.hoverImage || imagePath; // Simplify for now
 
-    const sql = "INSERT INTO products (name, category, price, image, hoverImage, description, stock) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    const params = [name, category, price, imagePath, hoverImage, description, stock];
+    const sql = "INSERT INTO products (name, category, price, image, hoverImage, description, stock, sizes, colors) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const params = [name, category, price, imagePath, hoverImage, description, stock, sizes, colors];
 
     db.run(sql, params, function(err) {
         if (err) {
@@ -458,14 +458,14 @@ app.post('/api/products', adminAuth, upload.single('image'), (req, res) => {
 
 // 3. Update Product
 app.put('/api/products/:id', adminAuth, upload.single('image'), (req, res) => {
-    const { name, category, price, description, stock, imageUrl } = req.body;
+    const { name, category, price, description, stock, imageUrl, sizes, colors } = req.body;
     let imagePath = imageUrl;
     if (req.file) {
         imagePath = `http://localhost:${PORT}/uploads/${req.file.filename}`;
     }
 
-    const sql = `UPDATE products SET name = ?, category = ?, price = ?, description = ?, stock = ?, image = ? WHERE id = ?`;
-    const params = [name, category, price, description, stock, imagePath, req.params.id];
+    const sql = `UPDATE products SET name = ?, category = ?, price = ?, description = ?, stock = ?, image = ?, sizes = ?, colors = ? WHERE id = ?`;
+    const params = [name, category, price, description, stock, imagePath, sizes, colors, req.params.id];
 
     db.run(sql, params, function(err) {
         if (err) {
@@ -554,8 +554,14 @@ app.post('/api/orders', async (req, res) => {
 
     // Send Email to Admin
     const adminEmail = 'hanzalak395@gmail.com';
-    const orderItemsList = normalizedItems.map(it => `${it.qty}x ${it.name} - $${(it.price * it.qty).toFixed(2)}`).join('\n');
-    const htmlList = normalizedItems.map(it => `<li>${it.qty}x ${it.name} - $${(it.price * it.qty).toFixed(2)}</li>`).join('');
+    const orderItemsList = normalizedItems.map(it => {
+        const variant = (it.selectedSize || it.selectedColor) ? ` (${it.selectedSize ? 'Size: ' + it.selectedSize : ''}${it.selectedColor ? ', Color: ' + it.selectedColor : ''})` : '';
+        return `${it.qty}x ${it.name}${variant} - $${(it.price * it.qty).toFixed(2)}`;
+    }).join('\n');
+    const htmlList = normalizedItems.map(it => {
+        const variant = (it.selectedSize || it.selectedColor) ? `<br><small>${it.selectedSize ? 'Size: ' + it.selectedSize : ''}${it.selectedColor ? ', Color: ' + it.selectedColor : ''}</small>` : '';
+        return `<li>${it.qty}x ${it.name}${variant} - $${(it.price * it.qty).toFixed(2)}</li>`;
+    }).join('');
     const mailOptions = {
         from: processEnv.SMTP_USER || 'no-reply@veloce.store',
         to: adminEmail,
